@@ -109,6 +109,7 @@ from ap.common.constants import (
     JobStatus,
     JobType,
     MasterDBType,
+    REMOTE_DATA_FILE_NAME
 )
 from ap.common.datetime_format_utils import convert_datetime_format
 from ap.common.memoize import clear_cache
@@ -180,7 +181,6 @@ import requests
 
 logger = logging.getLogger(__name__)
 api_setting_module_blueprint = Blueprint('api_setting_module', __name__, url_prefix='/ap/api/setting')
-
 
 @api_setting_module_blueprint.route('/update_polling_freq', methods=['POST'])
 def update_polling_freq():
@@ -1344,6 +1344,7 @@ def register_source_and_proc():
         return jsonify(data), 500
 
     data = {'message': _('Database Setting saved.'), 'is_error': False, 'processIds': new_process_ids}
+
     return jsonify(data), 200
 
 
@@ -1705,10 +1706,11 @@ def get_import_filter_from_process(process_id):
 
 @api_setting_module_blueprint.route('/convert_remote_data_to_file', methods=['POST'])
 def convert_remote_data_to_file():
-    url = json.loads(request.data)["data_link"]
+    url = json.loads(request.data).get("data_link")
     
-    with open("remote_data_temp.csv", "w") as f:
+    with open(REMOTE_DATA_FILE_NAME, "w") as f:
+        f.write("")
         result = requests.get(url)
         f.write(result.text)
 
-    return json.dumps({ "app_path": os.getcwd() }), result.status_code
+    return json.dumps({ "app_path": os.getcwd() + "\\" + REMOTE_DATA_FILE_NAME }), result.status_code

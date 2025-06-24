@@ -105,6 +105,8 @@ const REGISTER_JOB_STATUS = {
 const isAddNewMode = () => true;
 // override end
 
+const remoteFileName = "ap_remote_data_temp.csv"
+
 $(registerFromFileEles.directoryRadios).on('change', (e) => {
     const self = $(e.currentTarget);
     const value = self[0].value;
@@ -183,8 +185,9 @@ const handleOnChangeFolderAndFileUrl = async (isVerifyUrl) => {
         const url = $(registerFromFileEles.folderUrl).val().trim();
         const folderOrFileInfo = await checkFolderOrFile(url);
         const isLoadGUIFromUrl = !!getParamFromUrl('load_gui_from_url');
+        const isRemote = url.search(remoteFileName) >= 0;  // Might support batch import through HTTP in the future?
         // Show modal confirm import one data file of all files in the same folder
-        if (!isLoadGUIFromUrl && folderOrFileInfo.isFile) {
+        if (!isLoadGUIFromUrl && folderOrFileInfo.isFile && !isRemote) {
             $(registerFromFileEles.registerAllFilesButton).data('url', url);
             $(registerFromFileEles.confirmRegisterByFile).modal('show');
             return;
@@ -1062,7 +1065,20 @@ const handleLoadGUiFromExternalAPIRequest = () => {
     // If both source_folder and source_file is given, use source_folder
     // If source_file and estimation_file is given, ignore estimation_file
 
-    registerFromFileEles.folderUrl.val(sourcePath);
+    const isHTTP = sourcePath.search("https://") == 0 || sourcePath.search("http://") == 0;
+
+    if (isHTTP) {
+        const data = {
+            data_link: sourcePath
+        };
+
+        const response = fetchData('/ap/api/setting/convert_remote_data_to_file', JSON.stringify(data), 'POST');
+
+        registerFromFileEles.folderUrl.val(response.app_path + "\\" + remoteFileName);
+    }
+    else {
+        registerFromFileEles.folderUrl.val(sourcePath);
+    }
 
     if (estimationFile) {
         registerFromFileEles.refFileUrl.val(estimationFile);
@@ -1185,6 +1201,22 @@ jQuery(function () {
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(() => {
             // handle show data when enter a path to the input in Register by file
+            let url = $(registerFromFileEles.folderUrl).val().trim();
+            const isHTTP = url.search("https://") == 0 || url.search("http://") == 0;
+
+            if (isHTTP) {
+                const data = {
+                    data_link: url
+                };
+
+                fetchData('/ap/api/setting/convert_remote_data_to_file', JSON.stringify(data), 'POST').then((res) => {
+                    registerFromFileEles.folderUrl.val(res.app_path);
+                    handleOnChangeFolderAndFileUrl(true);
+                });
+
+                return;
+            }
+
             handleOnChangeFolderAndFileUrl(true).then(() => {});
         }, 300); // Delay input 300ms
     });

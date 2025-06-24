@@ -2037,3 +2037,6 @@ class GrLassoTask(BaseEnum):
     REGRESSION = 'regression'
     BINARY = 'binary'
     MULTI_CLASS = 'multiclass'
+
+
+REMOTE_DATA_FILE_NAME = "ap_remote_data_temp.csv"
