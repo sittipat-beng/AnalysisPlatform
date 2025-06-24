@@ -176,6 +176,8 @@ from ap.setting_module.services.trace_config import (
 )
 from ap.trace_data.transaction_model import TransactionData
 
+import requests
+
 logger = logging.getLogger(__name__)
 api_setting_module_blueprint = Blueprint('api_setting_module', __name__, url_prefix='/ap/api/setting')
 
@@ -1699,3 +1701,14 @@ def get_import_filter_from_process(process_id):
         return orjson_dumps(data=import_filters), 200
 
     return {}, 404
+
+
+@api_setting_module_blueprint.route('/convert_remote_data_to_file', methods=['POST'])
+def convert_remote_data_to_file():
+    url = json.loads(request.data)["data_link"]
+    
+    with open("remote_data_temp.csv", "w") as f:
+        result = requests.get(url)
+        f.write(result.text)
+
+    return json.dumps({ "app_path": os.getcwd() }), result.status_code
