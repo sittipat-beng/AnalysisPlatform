@@ -1072,9 +1072,17 @@ const handleLoadGUiFromExternalAPIRequest = () => {
             data_link: sourcePath
         };
 
-        const response = fetchData('/ap/api/setting/convert_remote_data_to_file', JSON.stringify(data), 'POST');
-
-        registerFromFileEles.folderUrl.val(response.app_path + "\\" + remoteFileName);
+        fetchData('/ap/api/setting/convert_remote_data_to_file', JSON.stringify(data), 'POST').then((res) => {
+            if (res.err_msg) {
+                addMessengerToProgressBar(res.err_msg, ICON_STATUS.WARNING);
+                addBorderToInvalidInput($(registerFromFileEles.folderUrl));
+                disableRegisterDataFileBtn();
+                resetPreviewTableContent();
+                return
+            }
+            
+            registerFromFileEles.folderUrl.val(res.app_path);
+        });
     }
     else {
         registerFromFileEles.folderUrl.val(sourcePath);
@@ -1210,6 +1218,14 @@ jQuery(function () {
                 };
 
                 fetchData('/ap/api/setting/convert_remote_data_to_file', JSON.stringify(data), 'POST').then((res) => {
+                    if (res.err_msg) {
+                        addMessengerToProgressBar(res.err_msg, ICON_STATUS.WARNING);
+                        addBorderToInvalidInput($(registerFromFileEles.folderUrl));
+                        disableRegisterDataFileBtn();
+                        resetPreviewTableContent();
+                        return
+                    }
+                    
                     registerFromFileEles.folderUrl.val(res.app_path);
                     handleOnChangeFolderAndFileUrl(true);
                 });

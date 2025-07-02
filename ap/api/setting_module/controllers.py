@@ -1710,7 +1710,11 @@ def convert_remote_data_to_file():
     
     with open(REMOTE_DATA_FILE_NAME, "w") as f:
         f.write("")
+
         result = requests.get(url)
+        if result.headers.get("content-type") != "application/vnd.ms-excel":
+            return json.dumps({ "err_msg": "File type not supported." }), 200
+
         f.write(result.text)
 
     return json.dumps({ "app_path": os.getcwd() + "\\" + REMOTE_DATA_FILE_NAME }), result.status_code
