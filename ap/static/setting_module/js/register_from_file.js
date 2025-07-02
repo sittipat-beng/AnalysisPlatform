@@ -105,7 +105,7 @@ const REGISTER_JOB_STATUS = {
 const isAddNewMode = () => true;
 // override end
 
-const remoteFileName = "ap_remote_data_temp.csv"
+const remoteFileName = "ap_remote_data_temp"
 
 $(registerFromFileEles.directoryRadios).on('change', (e) => {
     const self = $(e.currentTarget);
@@ -1074,6 +1074,7 @@ const handleLoadGUiFromExternalAPIRequest = () => {
 
         fetchData('/ap/api/setting/convert_remote_data_to_file', JSON.stringify(data), 'POST').then((res) => {
             if (res.err_msg) {
+                resetProgressBar();
                 addMessengerToProgressBar(res.err_msg, ICON_STATUS.WARNING);
                 addBorderToInvalidInput($(registerFromFileEles.folderUrl));
                 disableRegisterDataFileBtn();
@@ -1219,6 +1220,7 @@ jQuery(function () {
 
                 fetchData('/ap/api/setting/convert_remote_data_to_file', JSON.stringify(data), 'POST').then((res) => {
                     if (res.err_msg) {
+                        resetProgressBar();
                         addMessengerToProgressBar(res.err_msg, ICON_STATUS.WARNING);
                         addBorderToInvalidInput($(registerFromFileEles.folderUrl));
                         disableRegisterDataFileBtn();

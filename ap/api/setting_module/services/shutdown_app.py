@@ -27,10 +27,9 @@ def shut_down_app():
     if shutdown_function is not None:
         shutdown_function()
 
-    if os.path.exists(REMOTE_DATA_FILE_NAME):
-        os.remove(REMOTE_DATA_FILE_NAME)
-        logger.info("Removed temporary remote data file.")
-    else:
-        logger.info("Temporary remote data file not found. Removal skipped.")
+    for ext in (".csv", ".tsv"):
+        if os.path.exists(REMOTE_DATA_FILE_NAME + ext):
+            os.remove(REMOTE_DATA_FILE_NAME + ext)
+            logger.info("Removed temporary remote data file of type: " + ext)
 
     os._exit(0)

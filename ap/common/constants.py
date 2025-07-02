@@ -2039,4 +2039,4 @@ class GrLassoTask(BaseEnum):
     MULTI_CLASS = 'multiclass'
 
 
-REMOTE_DATA_FILE_NAME = "ap_remote_data_temp.csv"
+REMOTE_DATA_FILE_NAME = "ap_remote_data_temp"

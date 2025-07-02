@@ -1707,14 +1707,18 @@ def get_import_filter_from_process(process_id):
 @api_setting_module_blueprint.route('/convert_remote_data_to_file', methods=['POST'])
 def convert_remote_data_to_file():
     url = json.loads(request.data).get("data_link")
+
+    result = requests.get(url)
+    content_type = result.headers.get("content-type")
+    extension = ""
+    if content_type in ("application/vnd.ms-excel", "text/csv"):
+        extension = ".csv"
+    elif content_type == "text/tab-separated-values":
+        extension = ".tsv"
+    else:
+        return json.dumps({ "err_msg": "File type not supported." }), 200
     
-    with open(REMOTE_DATA_FILE_NAME, "w") as f:
-        f.write("")
-
-        result = requests.get(url)
-        if result.headers.get("content-type") != "application/vnd.ms-excel":
-            return json.dumps({ "err_msg": "File type not supported." }), 200
-
+    with open(REMOTE_DATA_FILE_NAME + extension, "w", encoding="utf-8") as f:
         f.write(result.text)
 
-    return json.dumps({ "app_path": os.getcwd() + "\\" + REMOTE_DATA_FILE_NAME }), result.status_code
+    return json.dumps({ "app_path": os.getcwd() + "\\" + REMOTE_DATA_FILE_NAME + extension }), result.status_code
