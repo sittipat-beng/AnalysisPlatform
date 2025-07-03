@@ -1711,9 +1711,9 @@ def convert_remote_data_to_file():
     result = requests.get(url)
     content_type = result.headers.get("content-type")
     extension = ""
-    if content_type in ("application/vnd.ms-excel", "text/csv"):
+    if content_type.find("application/vnd.ms-excel") > -1 or content_type.find("text/csv") > -1:
         extension = ".csv"
-    elif content_type == "text/tab-separated-values":
+    elif content_type.find("text/tab-separated-values") > -1:
         extension = ".tsv"
     else:
         return json.dumps({ "err_msg": "File type not supported." }), 200
